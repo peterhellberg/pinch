@@ -13,8 +13,6 @@ if we could bring that functionality to Ruby :)
 
 I’ve tested Pitch on 1.9.2. YMMV.
 
-== Prerequisites
-
 == Installation
 
     gem install pinch
