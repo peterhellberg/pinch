@@ -1,0 +1,50 @@
+= Pinch
+
+Retrieve a file from inside a zip file, over the network!
+
+Pinch makes it possible to download a specific file from within a ZIP file
+over HTTP/1.1 using nothing but the Ruby Standard Library (net/http and zlib)
+
+Pinch is the Ruby implementation of an idea that my colleague Edward Patel
+had a while back.
+
+The first version was written in Objetive-C and we thought it would be cool 
+if we could bring that functionality to Ruby :)
+
+I’ve tested Pitch on 1.9.2. YMMV.
+
+== Prerequisites
+
+== Installation
+
+    gem install pinch
+
+== Usage example
+
+    require 'pinch'
+
+    data = Pinch.get 'URL_TO_ZIP_FILE', 'path/file.ext'
+
+    puts data
+
+== LICENSE
+
+Copyright (c) 2011 Peter Hellberg and Edward Patel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
