@@ -3,7 +3,7 @@ require 'net/http'
 require 'zlib'
 
 class Pinch
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
 
   attr_reader :uri
   attr_reader :file_name
@@ -76,8 +76,12 @@ class Pinch
     file_data         = res.body[30+local_file_header[9]+local_file_header[10]..-1]
 
     if local_file_header[3] == 0
-      raise NotImplementedError, "Unable to read uncompressed ZIP files for now"
+      # Uncompressed file
+      offset = 30+local_file_header[9]+local_file_header[10]
+      res.body[offset..(offset+local_file_header[8]-1)]
     else
+      # Compressed file
+      file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
       Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
