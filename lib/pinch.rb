@@ -3,7 +3,7 @@ require 'net/http'
 require 'zlib'
 
 class Pinch
-  VERSION = "0.0.2"
+  VERSION = "0.0.3"
 
   attr_reader :uri
   attr_reader :file_name
@@ -13,6 +13,10 @@ class Pinch
 
   def self.get(url, file_name)
     new(url).data(file_name)
+  end
+
+  def self.get_filelist(url)
+    new(url).filelist
   end
 
   def initialize(url)
@@ -39,6 +43,14 @@ class Pinch
 
       headers
     end
+  end
+
+  def filelist
+    list = []
+
+    file_headers.each  { |k,v| list << k }
+
+    list
   end
 
   def data(file_name)
