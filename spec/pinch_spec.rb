@@ -30,4 +30,15 @@ describe Pinch do
       data.size.must_equal 2288
     end
   end
+
+  describe "#file_list" do
+    before do
+      @url = 'http://memention.com/ericjohnson-canabalt-ios-ef43b7d.zip'
+    end
+
+    it "should return a list with all the file names in the zip" do
+      file_list = Pinch.file_list(@url)
+      file_list.size.must_equal 491
+    end
+  end
 end

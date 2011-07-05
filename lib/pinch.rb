@@ -15,8 +15,8 @@ class Pinch
     new(url).data(file_name)
   end
 
-  def self.get_filelist(url)
-    new(url).filelist
+  def self.file_list(url)
+    new(url).file_list
   end
 
   def initialize(url)
@@ -45,7 +45,7 @@ class Pinch
     end
   end
 
-  def filelist
+  def file_list
     file_headers.keys
   end
 
