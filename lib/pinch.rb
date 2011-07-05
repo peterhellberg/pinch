@@ -3,7 +3,7 @@ require 'net/http'
 require 'zlib'
 
 class Pinch
-  VERSION = "0.0.5"
+  VERSION = "0.0.6"
 
   attr_reader :uri
   attr_reader :file_name
