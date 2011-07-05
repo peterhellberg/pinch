@@ -3,7 +3,7 @@ require 'net/http'
 require 'zlib'
 
 class Pinch
-  VERSION = "0.0.3"
+  VERSION = "0.0.4"
 
   attr_reader :uri
   attr_reader :file_name
@@ -17,8 +17,60 @@ class Pinch
   end
 
   def initialize(url)
-    @uri        = URI.parse(url)
-    @files      = {}
+    @uri    = URI.parse(url)
+    @files  = {}
+  end
+
+  def file_list
+    file_headers.keys
+  end
+
+  def data(file_name)
+    local_file(file_name)
+  end
+
+private
+
+  def local_file(file_name)
+    #0  uint32 localFileHeaderSignature
+    #1  uint16 versionNeededToExtract
+    #2  uint16 generalPurposeBitFlag
+    #3  uint16 compressionMethod
+    #4  uint16 fileLastModificationTime
+    #5  uint16 fileLastModificationDate
+    #6  uint32 CRC32
+    #7  uint32 compressedSize
+    #8  uint32 uncompressedSize
+    #9  uint16 fileNameLength
+    #10 uint16 extraFieldLength
+
+    raise Errno::ENOENT if file_headers[file_name].nil?
+
+    req = Net::HTTP::Get.new(uri.path)
+    req.set_range(file_headers[file_name][16],
+                  file_headers[file_name][16] +
+                  file_headers[file_name][8]  +
+                  file_headers[file_name][10] +
+                  file_headers[file_name][11] +
+                  file_headers[file_name][12] + 30)
+
+    res = Net::HTTP.start(uri.host, uri.port) do |http|
+      http.request(req)
+    end
+
+
+    local_file_header = res.body.unpack('VvvvvvVVVvv')
+    file_data         = res.body[30+local_file_header[9]+local_file_header[10]..-1]
+
+    if local_file_header[3] == 0
+      # Uncompressed file
+      offset = 30+local_file_header[9]+local_file_header[10]
+      res.body[offset..(offset+local_file_header[8]-1)]
+    else
+      # Compressed file
+      file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
+      Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
+    end
   end
 
   def file_headers
@@ -39,55 +91,6 @@ class Pinch
       end while true
 
       headers
-    end
-  end
-
-  def file_list
-    file_headers.keys
-  end
-
-  def data(file_name)
-    raise Errno::ENOENT if file_headers[file_name].nil?
-
-    req = Net::HTTP::Get.new(uri.path)
-    req.set_range(file_headers[file_name][16],
-                  file_headers[file_name][16] +
-                  file_headers[file_name][8]  +
-                  file_headers[file_name][10] +
-                  file_headers[file_name][11] +
-                  file_headers[file_name][12] + 30)
-
-    res = Net::HTTP.start(uri.host, uri.port) do |http|
-      http.request(req)
-    end
-
-    ###########################################################################
-    # Local file header
-    ###########################################################################
-
-    #0  uint32 localFileHeaderSignature
-    #1  uint16 versionNeededToExtract
-    #2  uint16 generalPurposeBitFlag
-    #3  uint16 compressionMethod
-    #4  uint16 fileLastModificationTime
-    #5  uint16 fileLastModificationDate
-    #6  uint32 CRC32
-    #7  uint32 compressedSize
-    #8  uint32 uncompressedSize
-    #9  uint16 fileNameLength
-    #10 uint16 extraFieldLength
-
-    local_file_header = res.body.unpack('VvvvvvVVVvv')
-    file_data         = res.body[30+local_file_header[9]+local_file_header[10]..-1]
-
-    if local_file_header[3] == 0
-      # Uncompressed file
-      offset = 30+local_file_header[9]+local_file_header[10]
-      res.body[offset..(offset+local_file_header[8]-1)]
-    else
-      # Compressed file
-      file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
-      Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
 
@@ -128,13 +131,6 @@ class Pinch
     end
   end
 
-  # Retrieve the content length of the file
-  def content_length
-    @content_length ||= Net::HTTP.start(@uri.host, @uri.port) { |http|
-      http.head(@uri.path)
-    }['Content-Length'].to_i
-  end
-
   def end_of_central_directory_record
     #0  uint16 numberOfThisDisk;
     #1  uint16 diskWhereCentralDirectoryStarts;
@@ -161,5 +157,12 @@ class Pinch
       # Split on the end record signature, and unpack the last one
       [hex.split("504b0506").last].pack("H*").unpack("vvvvVVv")
     end
+  end
+
+  # Retrieve the content length of the file
+  def content_length
+    @content_length ||= Net::HTTP.start(@uri.host, @uri.port) { |http|
+      http.head(@uri.path)
+    }['Content-Length'].to_i
   end
 end
