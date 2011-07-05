@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.summary     = "Retrieve a file from inside a zip file, over the network!"
   s.description = "Pinch makes it possible to download a specific file from within a ZIP file over HTTP 1.1."
   s.email       = "peter@c7.se"
-  s.homepage    = "https://github.com/peterhellberg/pinch"
+  s.homepage    = "http://peterhellberg.github.com/pinch/"
   s.authors     = ["Peter Hellberg", "Edward Patel"]
   s.license     = "MIT-LICENSE"
 
