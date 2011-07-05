@@ -13,7 +13,7 @@ describe Pinch do
 
     it "should return the contents of the file" do
       data = Pinch.get @url, @file
-      data.must_match /Morphic graphics architecture/
+      data.must_match(/Morphic graphics architecture/)
       data.size.must_equal 26424
     end
   end
@@ -26,7 +26,7 @@ describe Pinch do
 
     it "should return the contents of the file" do
       data = Pinch.get @url, @file
-      data.must_match /Daring Escape/
+      data.must_match(/Daring Escape/)
       data.size.must_equal 2288
     end
   end

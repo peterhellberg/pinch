@@ -7,9 +7,6 @@ class Pinch
 
   attr_reader :uri
   attr_reader :file_name
-  attr_reader :content_length
-  attr_reader :central_directory
-  attr_reader :file_headers
 
   def self.get(url, file_name)
     new(url).data(file_name)
