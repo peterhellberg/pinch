@@ -46,11 +46,7 @@ class Pinch
   end
 
   def filelist
-    list = []
-
-    file_headers.each  { |k,v| list << k }
-
-    list
+    file_headers.keys
   end
 
   def data(file_name)
