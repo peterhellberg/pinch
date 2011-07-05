@@ -11,7 +11,7 @@ had a while back.
 The first version was written in Objetive-C and we thought it would be cool 
 if we could bring that functionality to Ruby :)
 
-I’ve tested Pitch on 1.9.2. YMMV.
+I’ve tested Pinch on 1.9.2. YMMV.
 
 == Installation
 
