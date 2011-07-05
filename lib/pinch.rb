@@ -47,6 +47,8 @@ private
     raise Errno::ENOENT if file_headers[file_name].nil?
 
     req = Net::HTTP::Get.new(uri.path)
+    padding = 16
+
     req.set_range(file_headers[file_name][16],
       30 +
       file_headers[file_name][16] +
@@ -54,10 +56,7 @@ private
       file_headers[file_name][10] +
       file_headers[file_name][11] +
       file_headers[file_name][12] +
-      file_headers[file_name][13] +
-      file_headers[file_name][14] +
-      file_headers[file_name][15]
-      )
+      padding)
 
     res = Net::HTTP.start(uri.host, uri.port) do |http|
       http.request(req)
