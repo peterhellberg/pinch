@@ -48,11 +48,16 @@ private
 
     req = Net::HTTP::Get.new(uri.path)
     req.set_range(file_headers[file_name][16],
-                  file_headers[file_name][16] +
-                  file_headers[file_name][8]  +
-                  file_headers[file_name][10] +
-                  file_headers[file_name][11] +
-                  file_headers[file_name][12] + 30)
+      30 +
+      file_headers[file_name][16] +
+      file_headers[file_name][8]  +
+      file_headers[file_name][10] +
+      file_headers[file_name][11] +
+      file_headers[file_name][12] +
+      file_headers[file_name][13] +
+      file_headers[file_name][14] +
+      file_headers[file_name][15]
+      )
 
     res = Net::HTTP.start(uri.host, uri.port) do |http|
       http.request(req)
@@ -69,6 +74,7 @@ private
     else
       # Compressed file
       file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
+      # Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
       Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
