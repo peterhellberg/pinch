@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset='utf-8'>
+  <meta name="viewport" content = "width = device-width, initial-scale = 0.42" />
   <title>peterhellberg/pinch @ GitHub</title>
   <link href='http://fonts.googleapis.com/css?family=Sue+Ellen+Francisco&v1' rel='stylesheet' type='text/css'>
   <style type="text/css">
@@ -13,7 +14,8 @@
     }
     #container {
       margin: 0 auto;
-      width: 700px;
+      max-width: 700px;
+      min-width: 640px;
     }
 
     h1, h2, h3 {
@@ -32,10 +34,9 @@
       -moz-border-radius: 8px;
       border-radius: 8px;
     }
-    a { color: #BD1550; }
+    a { color: #BD1550; text-decoration: none; }
     p { font-weight: 300; margin-top: 0; }
     .description { font-size: 1.3em; font-weight: 300; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .footer { font-size: 0.9em; padding-top:30px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -67,13 +68,9 @@ data = Pinch.get 'http://peterhellberg.github.com/pinch/test.zip', 'data.json'
 
     <h2>Authors</h2>
     <p>
-      Edward Patel, <a href="http://twitter.com/e_patel">@e_patel</a> and
-      Peter Hellberg, <a href="http://twitter.com/peterhellberg">@peterhellberg</a>
+      Edward Patel (<a href="http://twitter.com/e_patel">@e_patel</a>) and
+      Peter Hellberg (<a href="http://twitter.com/peterhellberg">@peterhellberg</a>)
     </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/peterhellberg/pinch">peterhellberg/pinch</a>
-    </div>
   </div>
 </body>
 </html>
