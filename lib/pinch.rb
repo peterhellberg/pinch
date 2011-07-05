@@ -184,7 +184,7 @@ private
     @end_of_central_directory_record ||= begin
       # Retrieve a 4k of data from the end of the zip file
       request = Net::HTTP::Get.new(uri.path)
-      offset = content_length >= 4096 ? content_length-4096 : 0
+      offset  = content_length >= 4096 ? content_length-4096 : 0
 
       request.set_range(offset, content_length)
 
@@ -197,6 +197,9 @@ private
 
       # Split on the end record signature, and unpack the last one
       [hex.split("504b0506").last].pack("H*").unpack("vvvvVVv")
+
+      # Skipping the hex unpack and splitting on
+      # PK\x05\x06 instead was for some reason slower.
     end
   end
 
