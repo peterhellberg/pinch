@@ -3,32 +3,36 @@
 <head>
   <meta charset='utf-8'>
   <title>peterhellberg/pinch @ GitHub</title>
+  <link href='http://fonts.googleapis.com/css?family=Hammersmith+One&v1' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Sue+Ellen+Francisco&v1' rel='stylesheet' type='text/css'>
 
   <style type="text/css">
     body {
       margin-top: 1.0em;
-      background-color: #fff;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
+      background-color: #eee;
+      font-family: Helvetica Neue, Arial, FreeSans, san-serif;
       color: #333333;
     }
     #container {
       margin: 0 auto;
       width: 700px;
     }
-    h1 { font-size: 3.8em; color: #3a1f23; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
+
+    h1, h2, h3 {
+      font-family: 'Sue Ellen Francisco', arial, serif;
+    }
+
+    h1 { font-size: 5em; color: #555; margin-bottom: 3px; text-shadow: 1px 1px 1px #fff; }
+    h1 .small { font-size: 0.5em; }
     h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #3a1f23; }
+    h2 { font-size: 1.5em; color: #3a1f23; margin-bottom: 0.4em; margin-top: 1.2em; }
     h3 { text-align: center; color: #3a1f23; }
-    a { color: #3a1f23; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
+    a { color: #BD1550; }
+    p { font-weight: 300; margin-top: 0; }
+    .description { font-size: 1.3em; font-weight: 300; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .footer { font-size: 0.9em; padding-top:30px; font-style: italic; }
   </style>
 </head>
-
 <body>
   <a href="http://github.com/peterhellberg/pinch"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
@@ -41,18 +45,23 @@
     </div>
 
     <h2>Dependencies</h2>
-    <p>None</p>
+    <p>
+      None! (Just <a href="http://ruby-doc.org/stdlib/libdoc/net/http/rdoc/index.html">net/http</a> and 
+      <a href="http://ruby-doc.org/stdlib/libdoc/zlib/rdoc/index.html">zlib</a> from the Ruby Standard Library)
+    </p>
 
     <h2>Install</h2>
-    <p>gem install pinch</p>
+    <p>gem install <a href="http://rubygems.org/gems/pinch">pinch</a></p>
 
     <h2>Authors</h2>
-    <p>Edward Patel (@e_patel) <br/>Peter Hellberg (@peterhellberg)</p>
+    <p>
+      Edward Patel, <a href="http://twitter.com/e_patel">@e_patel</a>)<br/>
+      Peter Hellberg, <a href="http://twitter.com/peterhellberg">@peterhellberg</a>
+    </p>
 
     <div class="footer">
       get the source code on GitHub : <a href="http://github.com/peterhellberg/pinch">peterhellberg/pinch</a>
     </div>
-
   </div>
 </body>
 </html>
