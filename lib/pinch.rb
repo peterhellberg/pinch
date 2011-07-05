@@ -3,7 +3,7 @@ require 'net/http'
 require 'zlib'
 
 class Pinch
-  VERSION = "0.0.4"
+  VERSION = "0.0.5"
 
   attr_reader :uri
   attr_reader :file_name
@@ -74,7 +74,6 @@ private
     else
       # Compressed file
       file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
-      # Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
       Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
