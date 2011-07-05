@@ -2,30 +2,66 @@
 require 'net/http'
 require 'zlib'
 
+# @author Peter Hellberg
+# @author Edward Patel
 class Pinch
-  VERSION = "0.0.6"
+  VERSION = "0.0.7"
 
   attr_reader :uri
-  attr_reader :file_name
 
+  ##
+  # Retrieve a file from inside a zip file, over the network!
+  #
+  # @param    [String] url        Full URL to the ZIP file
+  # @param    [String] file_name  Name of the file inside the ZIP archive
+  # @return   [String]            File data, ready to be displayed/saved
+  # @example
+  #
+  #  puts Pinch.get('http://peterhellberg.github.com/pinch/test.zip', 'data.json')
+  #
   def self.get(url, file_name)
-    new(url).data(file_name)
+    new(url).get(file_name)
   end
 
+  ##
+  # List of files inside the zip file
+  #
+  # @param    [String] url        Full URL to the ZIP file
+  # @return   [Array]             List of all the files in the ZIP archive
+  # @example
+  #
+  #  Pinch.file_list('http://peterhellberg.github.com/pinch/test.zip').first #=> "data.json"
+  #
   def self.file_list(url)
     new(url).file_list
   end
 
+  ##
+  # Initializes a new Pinch object
+  #
+  # @param    [String] url        Full URL to the ZIP file
+  # @note You might want to use Pinch#get instead.
+  #
   def initialize(url)
     @uri    = URI.parse(url)
     @files  = {}
   end
 
+  ##
+  # @note You might want to use Pinch#file_list instead.
+  #
   def file_list
     file_headers.keys
   end
 
-  def data(file_name)
+  ##
+  # @example
+  #
+  #  puts Pinch.new('http://peterhellberg.github.com/pinch/test.zip').get('data.json')
+  #
+  # @note You might want to use Pinch#get instead
+  #
+  def get(file_name)
     local_file(file_name)
   end
 
@@ -76,6 +112,7 @@ private
       Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
+
 
   def file_headers
     @file_headers ||= begin
