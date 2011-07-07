@@ -26,5 +26,7 @@ Gem::Specification.new do |s|
                         %w(MIT-LICENSE README.rdoc Rakefile .gemtest)
 
   s.add_development_dependency('minitest')
+  s.add_development_dependency('fakeweb')
+  s.add_development_dependency('vcr')
 end
 

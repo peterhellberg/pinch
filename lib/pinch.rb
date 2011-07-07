@@ -1,11 +1,11 @@
 # encoding: utf-8
-require 'net/http'
+require 'net/https'
 require 'zlib'
 
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.0.7"
+  VERSION = "0.0.8"
 
   attr_reader :uri
 
@@ -82,37 +82,31 @@ private
 
     raise Errno::ENOENT if file_headers[file_name].nil?
 
-    req = Net::HTTP::Get.new(uri.path)
     padding = 16
 
-    req.set_range(file_headers[file_name][16],
-      30 +
-      file_headers[file_name][16] +
-      file_headers[file_name][8]  +
-      file_headers[file_name][10] +
-      file_headers[file_name][11] +
-      file_headers[file_name][12] +
-      padding)
+    offset_start = file_headers[file_name][16]
+    offset_end   = 30 + padding +
+                   file_headers[file_name][16] +
+                   file_headers[file_name][8]  +
+                   file_headers[file_name][10] +
+                   file_headers[file_name][11] +
+                   file_headers[file_name][12]
 
-    res = Net::HTTP.start(uri.host, uri.port) do |http|
-      http.request(req)
-    end
+    response = fetch_data(offset_start, offset_end)
 
-
-    local_file_header = res.body.unpack('VvvvvvVVVvv')
-    file_data         = res.body[30+local_file_header[9]+local_file_header[10]..-1]
+    local_file_header = response.body.unpack('VvvvvvVVVvv')
+    file_data         = response.body[30+local_file_header[9]+local_file_header[10]..-1]
 
     if local_file_header[3] == 0
       # Uncompressed file
       offset = 30+local_file_header[9]+local_file_header[10]
-      res.body[offset..(offset+local_file_header[8]-1)]
+      response.body[offset..(offset+local_file_header[8]-1)]
     else
       # Compressed file
-      file_data = res.body[30+local_file_header[9]+local_file_header[10]..-1]
+      file_data = response.body[30+local_file_header[9]+local_file_header[10]..-1]
       Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(file_data)
     end
   end
-
 
   def file_headers
     @file_headers ||= begin
@@ -155,19 +149,15 @@ private
     #16 uint32 relativeOffsetOfLocalFileHeader
 
     @central_directory ||= begin
-      req = Net::HTTP::Get.new(uri.path)
-      req.set_range(end_of_central_directory_record[5],
-                    end_of_central_directory_record[5] +
-                    end_of_central_directory_record[4])
+      offset_start = end_of_central_directory_record[5]
+      offset_end   = end_of_central_directory_record[5] + end_of_central_directory_record[4]
 
-      res = Net::HTTP.start(uri.host, uri.port) { |http|
-        http.request(req)
-      }
+      response = fetch_data(offset_start, offset_end)
 
-      if [200, 206].include?(res.code)
-        raise RuntimeError, "Couldn’t find the ZIP file (HTTP: #{res.code})"
+      if [200, 206].include?(response.code)
+        raise RuntimeError, "Couldn’t find the ZIP file (HTTP: #{response.code})"
       else
-        res.body
+        response.body
       end
     end
   end
@@ -183,14 +173,9 @@ private
 
     @end_of_central_directory_record ||= begin
       # Retrieve a 4k of data from the end of the zip file
-      request = Net::HTTP::Get.new(uri.path)
       offset  = content_length >= 4096 ? content_length-4096 : 0
 
-      request.set_range(offset, content_length)
-
-      response = Net::HTTP.start(uri.host, uri.port) do |http|
-        http.request(request)
-      end
+      response = fetch_data(offset, content_length)
 
       # Unpack the body into a hex string
       hex = response.body.unpack("H*")[0]
@@ -203,10 +188,35 @@ private
     end
   end
 
+  ##
+  # Get range of data from URL
+  def fetch_data(offset_start, offset_end)
+    request = Net::HTTP::Get.new(@uri.request_uri)
+    request.set_range(offset_start, offset_end)
+
+    prepared_connection.request(request)
+  end
+
+  ##
   # Retrieve the content length of the file
   def content_length
-    @content_length ||= Net::HTTP.start(@uri.host, @uri.port) { |http|
+    @content_length ||= prepared_connection.start { |http|
       http.head(@uri.path)
     }['Content-Length'].to_i
+  end
+
+  ##
+  # Prepare the connection and GET request
+  def prepared_connection
+    @prepared_connection ||= begin
+      http = Net::HTTP.new(@uri.host, @uri.port)
+
+      if @uri.is_a?(URI::HTTPS)
+        http.use_ssl      = true
+        http.verify_mode  = OpenSSL::SSL::VERIFY_NONE
+      end
+
+      http
+    end
   end
 end
