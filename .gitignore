@@ -2,3 +2,4 @@
 *.gem
 demo.rb
 .yardoc
+spec/fixtures
