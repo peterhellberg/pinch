@@ -21,7 +21,7 @@ I’ve tested Pinch on 1.9.2. YMMV.
 
     require 'pinch'
 
-    data = Pinch.get 'URL_TO_ZIP_FILE', 'path/file.ext'
+    data = Pinch.get 'http://peterhellberg.github.com/pinch/test.zip', 'data.json'
 
     puts data
 
