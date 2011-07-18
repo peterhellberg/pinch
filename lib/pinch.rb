@@ -5,7 +5,7 @@ require 'zlib'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.0.8"
+  VERSION = "0.0.9"
 
   attr_reader :uri
 
@@ -37,10 +37,23 @@ class Pinch
   end
 
   ##
+  # Retrieve the size of the ZIP file
+  #
+  # @param    [String] url        Full URL to the ZIP file
+  # @return   [Fixnum]            Size of the ZIP file
+  # @example
+  #
+  #  Pinch.content_length('http://peterhellberg.github.com/pinch/test.zip') #=> 2516612
+  #
+  def self.content_length(url)
+    new(url).content_length
+  end
+
+  ##
   # Initializes a new Pinch object
   #
   # @param    [String] url        Full URL to the ZIP file
-  # @note You might want to use Pinch#get instead.
+  # @note You might want to use Pinch.get instead.
   #
   def initialize(url)
     @uri    = URI.parse(url)
@@ -48,7 +61,7 @@ class Pinch
   end
 
   ##
-  # @note You might want to use Pinch#file_list instead.
+  # @note You might want to use Pinch.file_list instead.
   #
   def file_list
     file_headers.keys
@@ -59,10 +72,19 @@ class Pinch
   #
   #  puts Pinch.new('http://peterhellberg.github.com/pinch/test.zip').get('data.json')
   #
-  # @note You might want to use Pinch#get instead
+  # @note You might want to use Pinch.get instead
   #
   def get(file_name)
     local_file(file_name)
+  end
+
+  ##
+  # @note You might want to use Pinch.content_length instead
+  #
+  def content_length
+    @content_length ||= prepared_connection.start { |http|
+      http.head(@uri.path)
+    }['Content-Length'].to_i
   end
 
 private
@@ -195,14 +217,6 @@ private
     request.set_range(offset_start, offset_end)
 
     prepared_connection.request(request)
-  end
-
-  ##
-  # Retrieve the content length of the file
-  def content_length
-    @content_length ||= prepared_connection.start { |http|
-      http.head(@uri.path)
-    }['Content-Length'].to_i
   end
 
   ##

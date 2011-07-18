@@ -12,7 +12,7 @@ end
 require File.dirname(__FILE__) + '/../lib/pinch'
 
 describe Pinch do
-  describe "when calling get on a compressed zip file" do
+  describe "when calling get on a compressed ZIP file" do
     it "should return the contents of the file" do
       VCR.use_cassette('squeak') do
         @url  = 'http://ftp.sunet.se/pub/lang/smalltalk/Squeak/current_stable/Squeak3.8-6665-full.zip'
@@ -25,7 +25,7 @@ describe Pinch do
     end
   end
 
-  describe "when calling get on a zip file that is not compressed" do
+  describe "when calling get on a ZIP file that is not compressed" do
     it "should return the contents of the file" do
       VCR.use_cassette('canabalt') do
         @url  = 'http://memention.com/ericjohnson-canabalt-ios-ef43b7d.zip'
@@ -38,7 +38,7 @@ describe Pinch do
     end
   end
 
-  describe "when calling get on the example zip file" do
+  describe "when calling get on the example ZIP file" do
     before do
       @url  = 'http://peterhellberg.github.com/pinch/test.zip'
       @file = 'data.json'
@@ -70,13 +70,25 @@ describe Pinch do
     end
   end
 
-  describe "#file_list" do
-    it "should return a list with all the file names in the zip" do
+  describe "Pinch.file_list" do
+    it "should return a list with all the file names in the ZIP file" do
       VCR.use_cassette('file_list') do
         @url = 'http://memention.com/ericjohnson-canabalt-ios-ef43b7d.zip'
 
         file_list = Pinch.file_list(@url)
         file_list.size.must_equal 491
+      end
+    end
+  end
+
+  describe "Pinch.content_length" do
+    before do
+      @url  = 'http://peterhellberg.github.com/pinch/test.zip'
+    end
+
+    it "should return the size of the ZIP file" do
+      VCR.use_cassette('content_length') do
+        Pinch.content_length(@url).must_equal 2516612
       end
     end
   end
