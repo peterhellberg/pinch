@@ -91,5 +91,13 @@ describe Pinch do
         Pinch.content_length(@url).must_equal 2516612
       end
     end
+
+    it "should raise an exception if the file doesn't exist" do
+      VCR.use_cassette('content_length_404') do
+        lambda {
+          Pinch.content_length(@url+'404')
+        }.must_raise Net::HTTPServerException
+      end
+    end
   end
 end

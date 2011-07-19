@@ -5,7 +5,7 @@ require 'zlib'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.0.9"
+  VERSION = "0.1.0"
 
   attr_reader :uri
 
@@ -82,9 +82,16 @@ class Pinch
   # @note You might want to use Pinch.content_length instead
   #
   def content_length
-    @content_length ||= prepared_connection.start { |http|
-      http.head(@uri.path)
-    }['Content-Length'].to_i
+    @content_length ||= begin
+      response = prepared_connection.start { |http|
+        http.head(@uri.path)
+      }
+
+      # Raise exception if the response code isn’t in the 2xx range
+      response.error! unless response.kind_of?(Net::HTTPSuccess)
+
+      response['Content-Length'].to_i
+    end
   end
 
 private
