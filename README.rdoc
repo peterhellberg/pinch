@@ -8,12 +8,12 @@ over HTTP/1.1 using nothing but the Ruby Standard Library (net/http and zlib)
 Pinch is the Ruby implementation of an idea that my colleague Edward Patel
 had a while back.
 
-The first version was written in Objetive-C and we thought it would be cool 
+The first version was written in Objective-C and we thought it would be cool
 if we could bring that functionality to Ruby :)
 
-The Objective-C version is available on https://github.com/epatel/pinch-objc/
+That version is available on https://github.com/epatel/pinch-objc/
 
-I’ve tested Pinch on 1.9.2. YMMV.
+I’ve tested Pinch on 1.9.2, 1.8.7 and MacRuby 0.10, YMMV.
 
 == Installation
 
