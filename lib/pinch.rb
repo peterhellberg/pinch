@@ -56,8 +56,9 @@ class Pinch
   # @note You might want to use Pinch.get instead.
   #
   def initialize(url)
-    @uri    = URI.parse(url)
-    @files  = {}
+    @uri     = URI.parse(url)
+    @files   = {}
+    @retries = 3
   end
 
   ##
@@ -83,7 +84,7 @@ class Pinch
   #
   def content_length
     @content_length ||= begin
-      response = prepared_connection.start { |http|
+      response = connection(@uri).start { |http|
         http.head(@uri.path)
       }
 
@@ -91,6 +92,9 @@ class Pinch
       response.error! unless response.kind_of?(Net::HTTPSuccess)
 
       response['Content-Length'].to_i
+    rescue Net::HTTPRetriableError => e
+      @uri = URI.parse(e.response['Location'])
+      retry if (@retries -= 1) > 0
     end
   end
 
@@ -223,21 +227,19 @@ private
     request = Net::HTTP::Get.new(@uri.request_uri)
     request.set_range(offset_start, offset_end)
 
-    prepared_connection.request(request)
+    connection(@uri).request(request)
   end
 
   ##
-  # Prepare the connection and GET request
-  def prepared_connection
-    @prepared_connection ||= begin
-      http = Net::HTTP.new(@uri.host, @uri.port)
+  # A connection that automatically enables SSL (No verification)
+  def connection(uri)
+    http = Net::HTTP.new(uri.host, uri.port)
 
-      if @uri.is_a?(URI::HTTPS)
-        http.use_ssl      = true
-        http.verify_mode  = OpenSSL::SSL::VERIFY_NONE
-      end
-
-      http
+    if uri.is_a?(URI::HTTPS)
+      http.use_ssl      = true
+      http.verify_mode  = OpenSSL::SSL::VERIFY_NONE
     end
+
+    http
   end
 end

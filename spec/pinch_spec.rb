@@ -1,3 +1,6 @@
+# Require psych under MRI to remove warning messages
+require 'psych' if RUBY_ENGINE == "ruby"
+
 require 'minitest/pride'
 require 'minitest/autorun'
 require 'minitest/spec'
@@ -12,6 +15,15 @@ end
 require File.dirname(__FILE__) + '/../lib/pinch'
 
 describe Pinch do
+  describe "when calling get on a route that redirects to a zip file" do
+    it "should return a content length for a redirected file" do
+      VCR.use_cassette('redirected_content_lenght') do
+        @url  = 'https://github.com/peterhellberg/pinch/zipball/master'
+        Pinch.content_length(@url).must_be :>, 0
+      end
+    end
+  end
+
   describe "when calling get on a compressed ZIP file" do
     it "should return the contents of the file" do
       VCR.use_cassette('squeak') do
