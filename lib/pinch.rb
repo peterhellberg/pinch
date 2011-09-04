@@ -5,7 +5,7 @@ require 'zlib'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.1.0"
+  VERSION = "0.2.0"
 
   attr_reader :uri
 
