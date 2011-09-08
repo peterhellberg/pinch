@@ -5,9 +5,7 @@ require 'zlib'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  class RangeHeaderException < StandardError; end
-
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
 
   attr_reader :uri
 
@@ -55,12 +53,13 @@ class Pinch
   # Initializes a new Pinch object
   #
   # @param    [String] url        Full URL to the ZIP file
+  # @param    [Strin]  redirects  (Optional) Number of redirects to follow
   # @note You might want to use Pinch.get instead.
   #
-  def initialize(url)
-    @uri     = URI.parse(url)
-    @files   = {}
-    @retries = 3
+  def initialize(url, redirects = 5)
+    @uri       = URI.parse(url)
+    @files     = {}
+    @redirects = redirects
   end
 
   ##
@@ -87,7 +86,7 @@ class Pinch
   def content_length
     @content_length ||= begin
       response = connection(@uri).start { |http|
-        http.head2(@uri.path)
+        http.head(@uri.path)
       }
 
       # Raise exception if the response code isn’t in the 2xx range
@@ -102,7 +101,12 @@ class Pinch
       response['Content-Length'].to_i
     rescue Net::HTTPRetriableError => e
       @uri = URI.parse(e.response['Location'])
-      retry if (@retries -= 1) > 0
+
+      if (@redirects -= 1) > 0
+        retry
+      else
+        raise TooManyRedirects, "Gave up at on #{@uri.host}"
+      end
     end
   end
 
@@ -251,4 +255,7 @@ private
 
     http
   end
+
+  class RangeHeaderException < StandardError; end
+  class TooManyRedirects < StandardError; end
 end
