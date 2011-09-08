@@ -5,6 +5,8 @@ require 'zlib'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
+  class RangeHeaderException < StandardError; end
+
   VERSION = "0.2.0"
 
   attr_reader :uri
@@ -85,11 +87,17 @@ class Pinch
   def content_length
     @content_length ||= begin
       response = connection(@uri).start { |http|
-        http.head(@uri.path)
+        http.head2(@uri.path)
       }
 
       # Raise exception if the response code isn’t in the 2xx range
       response.error! unless response.kind_of?(Net::HTTPSuccess)
+
+      # Raise exception if the server doesn’t support the Range header
+      unless (response['Accept-Ranges'] or "").include?('bytes')
+        raise RangeHeaderException,
+              "Range HTTP header not supported on #{@uri.host}"
+      end
 
       response['Content-Length'].to_i
     rescue Net::HTTPRetriableError => e
@@ -165,12 +173,14 @@ private
 
       headers = {}
 
-      central_directory.unpack("H*")[0].split("504b0102")[1..-1].each do |fh|
-        data        = ["504b0102#{fh}"].pack('H*')
-        file_header = data.unpack('VvvvvvvVVVvvvvvVV')
-        file_name   = data[46...46+file_header[10]]
-
-        headers[file_name] = file_header
+      central_directory.
+        unpack("H*")[0].
+        split("504b0102")[1..-1].
+        each do |fh|
+          data        = ["504b0102#{fh}"].pack('H*')
+          file_header = data.unpack('VvvvvvvVVVvvvvvVV')
+          file_name   = data[46...46+file_header[10]]
+          headers[file_name] = file_header
       end
 
       headers
@@ -207,11 +217,14 @@ private
 
       response = fetch_data(offset, content_length)
 
-      # Unpack the body into a hex string
-      hex = response.body.unpack("H*")[0]
-
-      # Split on the end record signature, and unpack the last one
-      [hex.split("504b0506").last[0...36]].pack("H*").unpack("vvvvVVv")
+      # Unpack the body into a hex string then split on
+      # the end record signature, and finally unpack the last one.
+      [response.body.
+        unpack("H*")[0].
+        split("504b0506").
+        last[0...36]].
+        pack("H*").
+        unpack("vvvvVVv")
 
       # Skipping the hex unpack and splitting on
       # PK\x05\x06 instead was for some reason slower.
@@ -223,7 +236,6 @@ private
   def fetch_data(offset_start, offset_end)
     request = Net::HTTP::Get.new(@uri.request_uri)
     request.set_range(offset_start, offset_end)
-
     connection(@uri).request(request)
   end
 

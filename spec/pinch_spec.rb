@@ -5,7 +5,6 @@ require 'minitest/pride'
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'vcr'
-require 'pry'
 
 VCR.config do |c|
   c.allow_http_connections_when_no_cassette = true
@@ -16,30 +15,13 @@ end
 require File.dirname(__FILE__) + '/../lib/pinch'
 
 describe Pinch do
-  describe "when calling content_length on a url that redirects to a zip file" do
-    it "should return a non zero content length" do
-      VCR.use_cassette('redirected_content_lenght') do
+  describe "url that redirects to the pinch zipball" do
+    it "should throw an exception about missing Range header support on GitHub" do
+      VCR.use_cassette('pinch_zipball') do
         @url = 'https://github.com/peterhellberg/pinch/zipball/master'
-        Pinch.content_length(@url).must_be :>, 0
-      end
-    end
-  end
-
-  describe "when calling file_list on a url that redirects to a zip file" do
-    before do
-      @url = 'https://github.com/peterhellberg/pinch/zipball/master'
-    end
-
-    it "should contain all files in the zip file" do
-      VCR.use_cassette('redirected_pinch') do
-        Pinch.file_list(@url).size.must_equal 12
-      end
-    end
-
-    it "should contain a README.rdoc" do
-      VCR.use_cassette('redirected_pinch') do
-        file_list = Pinch.file_list(@url)
-        file_list.must_include "#{file_list[0]}README.rdoc"
+        lambda {
+          Pinch.file_list(@url)
+        }.must_raise Pinch::RangeHeaderException
       end
     end
   end
