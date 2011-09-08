@@ -1,5 +1,7 @@
 # Require psych under MRI to remove warning messages
-require 'psych' if RUBY_ENGINE == "ruby"
+if Object.const_defined?(:RUBY_ENGINE) && RUBY_ENGINE == "ruby"
+  require 'psych'
+end
 
 require 'minitest/pride'
 require 'minitest/autorun'
