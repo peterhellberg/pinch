@@ -142,27 +142,6 @@ private
   end
 
   def file_headers
-    @file_headers ||= begin
-      raise RuntimeError, "Couldn’t find the central directory." if central_directory.nil?
-
-      headers = {}
-      tmp     = central_directory
-
-      begin
-        cd = tmp.unpack('VvvvvvvVVVvvvvvVV')
-        break if cd[1] == 0
-
-        length            = 46+cd[10]+cd[11]+cd[12]
-        current_file_name = tmp[46...46+cd[10]]
-        tmp               = tmp[length..-1]
-        headers[current_file_name] = cd
-      end while true
-
-      headers
-    end
-  end
-
-  def central_directory
     #0  uint32 centralDirectoryFileHeaderSignature
     #1  uint16 versionMadeBy
     #2  uint16 versionNeededToExtract
@@ -181,6 +160,24 @@ private
     #15 uint32 externalFileAttributes
     #16 uint32 relativeOffsetOfLocalFileHeader
 
+    @file_headers ||= begin
+      raise RuntimeError, "Couldn’t find the central directory." if central_directory.nil?
+
+      headers = {}
+
+      central_directory.unpack("H*")[0].split("504b0102")[1..-1].each do |fh|
+        data        = ["504b0102#{fh}"].pack('H*')
+        file_header = data.unpack('VvvvvvvVVVvvvvvVV')
+        file_name   = data[46...46+file_header[10]]
+
+        headers[file_name] = file_header
+      end
+
+      headers
+    end
+  end
+
+  def central_directory
     @central_directory ||= begin
       offset_start = end_of_central_directory_record[5]
       offset_end   = end_of_central_directory_record[5] + end_of_central_directory_record[4]
@@ -206,7 +203,7 @@ private
 
     @end_of_central_directory_record ||= begin
       # Retrieve a 4k of data from the end of the zip file
-      offset  = content_length >= 4096 ? content_length-4096 : 0
+      offset = content_length >= 4096 ? content_length-4096 : 0
 
       response = fetch_data(offset, content_length)
 
@@ -214,7 +211,7 @@ private
       hex = response.body.unpack("H*")[0]
 
       # Split on the end record signature, and unpack the last one
-      [hex.split("504b0506").last].pack("H*").unpack("vvvvVVv")
+      [hex.split("504b0506").last[0...36]].pack("H*").unpack("vvvvVVv")
 
       # Skipping the hex unpack and splitting on
       # PK\x05\x06 instead was for some reason slower.
