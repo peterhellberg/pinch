@@ -53,7 +53,7 @@ class Pinch
   # Initializes a new Pinch object
   #
   # @param    [String] url        Full URL to the ZIP file
-  # @param    [Strin]  redirects  (Optional) Number of redirects to follow
+  # @param    [Fixnum] redirects  (Optional) Number of redirects to follow
   # @note You might want to use Pinch.get instead.
   #
   def initialize(url, redirects = 5)
