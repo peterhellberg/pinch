@@ -4,3 +4,4 @@ Gemfile.lock
 demo.rb
 .yardoc
 spec/fixtures
+.rbx
