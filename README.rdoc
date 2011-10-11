@@ -15,6 +15,9 @@ That version is available on https://github.com/epatel/pinch-objc/
 
 I’ve tested Pinch on 1.9.2, 1.8.7 and MacRuby 0.10, YMMV.
 
+The specs currently blows up on rbx-head and MagLev.
+(Pinch does seem to work on Rubinius though)
+
 == Installation
 
     gem install pinch
