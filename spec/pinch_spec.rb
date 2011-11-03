@@ -1,6 +1,15 @@
+# encoding: utf-8
+
 # Require psych under MRI to remove warning messages
 if Object.const_defined?(:RUBY_ENGINE) && RUBY_ENGINE == "ruby"
   require 'psych'
+end
+
+begin
+  gem 'minitest'
+rescue LoadError
+  # Run the tests with the built in minitest instead
+  # if the gem isn’t installed.
 end
 
 require 'minitest/pride'
