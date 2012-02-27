@@ -2,7 +2,11 @@
 
 # Require psych under MRI to remove warning messages
 if Object.const_defined?(:RUBY_ENGINE) && RUBY_ENGINE == "ruby"
-  require 'psych'
+  begin
+    require 'psych'
+  rescue LoadError
+    # Psych isn’t installed
+  end
 end
 
 begin
