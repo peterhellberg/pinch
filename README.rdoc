@@ -17,6 +17,8 @@ I’ve tested Pinch on 1.9.2, 1.8.7, MacRuby 0.10, JRuby 1.6.4 and rbx-head, YMM
 
 The specs currently blows up on MagLev.
 
+{<img src="https://secure.travis-ci.org/peterhellberg/pinch.png?branch=master" />}[http://travis-ci.org/peterhellberg/pinch]
+
 == Installation
 
     gem install pinch
