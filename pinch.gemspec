@@ -25,9 +25,9 @@ Gem::Specification.new do |s|
   s.files             = Dir.glob("lib/**/*") +
                         %w(MIT-LICENSE README.rdoc Rakefile .gemtest)
 
-  s.add_development_dependency('yard')
-  s.add_development_dependency('minitest')
-  s.add_development_dependency('fakeweb')
-  s.add_development_dependency('vcr')
+  s.add_development_dependency 'yard'
+  s.add_development_dependency 'minitest', '~> 2.12'
+  s.add_development_dependency 'fakeweb', '~> 1.3'
+  s.add_development_dependency 'vcr', '~> 2.0'
 end
 
