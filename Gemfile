@@ -3,6 +3,6 @@ gemspec
 
 gem 'rake'
 
-group :development do
+group :documentation do
   gem 'yard'
 end
