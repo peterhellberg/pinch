@@ -21,10 +21,10 @@ require 'minitest/autorun'
 require 'minitest/spec'
 require 'vcr'
 
-VCR.config do |c|
+VCR.configure do |c|
   c.allow_http_connections_when_no_cassette = true
   c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
-  c.stub_with :fakeweb
+  c.hook_into :fakeweb
 end
 
 require File.dirname(__FILE__) + '/../lib/pinch'
