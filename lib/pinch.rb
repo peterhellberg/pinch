@@ -139,12 +139,7 @@ private
                    file_headers[file_name][12]
 
     if block_given?
-      local_file_header = fetch_data(offset_start, offset_start + 30).body.unpack('VvvvvvVVVvv')
-
-      file_offset = offset_start + 30 + local_file_header[9] + local_file_header[10]
-      file_length = local_file_header[7]
-
-      fetch_data(file_offset, file_offset + file_length) do |response|
+      fetch_data(offset_start, offset_end) do |response|
         yield PinchResponse.new(response)
       end
     else
@@ -251,7 +246,7 @@ private
   # Get range of data from URL
   def fetch_data(offset_start, offset_end, &block)
     request = Net::HTTP::Get.new(@uri.request_uri)
-    request.set_range(offset_start, offset_end)
+    request.set_range(offset_start..offset_end)
     connection(@uri).request(request, &block)
   end
 
