@@ -82,6 +82,19 @@ describe Pinch do
       end
     end
 
+    it "should yield to the block with PinchResponse object similar to HTTPResponse" do
+      body = ''
+      VCR.use_cassette('test_zip_with_block') do
+        Pinch.get(@url, @file) do |response|
+          response.must_be_kind_of PinchResponse
+          response.read_body do |chunk|
+            body << chunk
+          end
+        end
+      end
+      body.must_equal @data
+    end
+
     it "should retrieve the contents of the file data.json when passed a HTTPS url" do
       VCR.use_cassette('ssl_test') do
         @url  = 'https://dl.dropbox.com/u/2230186/pinch_test.zip'
