@@ -6,7 +6,7 @@ require 'pinch_response'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.2.1"
+  VERSION = "0.3.0"
 
   attr_reader :uri
 
