@@ -205,10 +205,11 @@ private
 
       response = fetch_data(offset_start, offset_end)
 
-      if [200, 206].include?(response.code)
-        raise RuntimeError, "Couldn’t find the ZIP file (HTTP: #{response.code})"
-      else
+
+      if ['200', '206'].include?(response.code)
         response.body
+      else
+        raise RuntimeError, "Couldn’t find the ZIP file (HTTP: #{response.code})"
       end
     end
   end
