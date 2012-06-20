@@ -6,61 +6,88 @@ require 'pinch_response'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.3.0"
+  VERSION = "0.3.1"
 
-  attr_reader :uri
+  attr_reader :uri, :user, :pass
 
   ##
   # Retrieve a file from inside a zip file, over the network!
   #
   # @param    [String] url        Full URL to the ZIP file
   # @param    [String] file_name  Name of the file inside the ZIP archive
+  # @param    [String] user       (Optional) Username for Basic Authentication
+  # @param    [String] pass       (Optional) Password for Basic Authentication
   # @return   [String]            File data, ready to be displayed/saved
   # @example
   #
   #  puts Pinch.get('http://peterhellberg.github.com/pinch/test.zip', 'data.json')
   #
-  def self.get(url, file_name, &block)
-    new(url).get(file_name, &block)
+  def self.get(url, file_name, user = nil, pass = nil, &block)
+    new(url, user, pass).get(file_name, &block)
   end
 
   ##
   # List of files inside the zip file
   #
   # @param    [String] url        Full URL to the ZIP file
+  # @param    [String] user       (Optional) Username for Basic Authentication
+  # @param    [String] pass       (Optional) Password for Basic Authentication
   # @return   [Array]             List of all the files in the ZIP archive
   # @example
   #
   #  Pinch.file_list('http://peterhellberg.github.com/pinch/test.zip').first #=> "data.json"
   #
-  def self.file_list(url)
-    new(url).file_list
+  def self.file_list(url, user = nil, pass = nil)
+    new(url, user, pass).file_list
   end
 
   ##
   # Retrieve the size of the ZIP file
   #
   # @param    [String] url        Full URL to the ZIP file
+  # @param    [String] user       (Optional) Username for Basic Authentication
+  # @param    [String] pass       (Optional) Password for Basic Authentication
   # @return   [Fixnum]            Size of the ZIP file
   # @example
   #
   #  Pinch.content_length('http://peterhellberg.github.com/pinch/test.zip') #=> 2516612
   #
-  def self.content_length(url)
-    new(url).content_length
+  def self.content_length(url, user = nil, pass = nil)
+    new(url, user, pass).content_length
   end
 
   ##
   # Initializes a new Pinch object
   #
   # @param    [String] url        Full URL to the ZIP file
+  # @param    [String] user       (Optional) Username for Basic Authentication
+  # @param    [String] pass       (Optional) Password for Basic Authentication
   # @param    [Fixnum] redirects  (Optional) Number of redirects to follow
   # @note You might want to use Pinch.get instead.
   #
-  def initialize(url, redirects = 5)
+  def initialize(url, user = nil, pass = nil, redirects = 5)
     @uri       = URI.parse(url)
+    @user      = user
+    @pass      = pass
     @files     = {}
     @redirects = redirects
+  end
+  
+  ##
+  # Set Username and Password for Basic Authentication
+  #
+  # @param    [String] username   (Optional) Username for Basic Authentication
+  # @param    [String] password   (Optional) Password for Basic Authentication
+  # @return   [Pinch]             Returns self to support chained calls
+  # @example
+  #
+  #  puts Pinch.new('http://code.mrgossett.com/pinch_test.zip').auth('pinch_test','thisisjustatest').get('data.json')
+  #
+  def auth(username, password)
+    @user = username
+    @pass = password
+    
+    return self
   end
 
   ##
@@ -86,9 +113,9 @@ class Pinch
   #
   def content_length
     @content_length ||= begin
-      response = connection(@uri).start { |http|
-        http.head(@uri.path)
-      }
+      request = Net::HTTP::Head.new(@uri.request_uri)
+      request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
+      response = connection(@uri).request(request)
 
       # Raise exception if the response code isn’t in the 2xx range
       response.error! unless response.kind_of?(Net::HTTPSuccess)
@@ -247,6 +274,7 @@ private
   # Get range of data from URL
   def fetch_data(offset_start, offset_end, &block)
     request = Net::HTTP::Get.new(@uri.request_uri)
+    request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
     request.set_range(offset_start..offset_end)
     connection(@uri).request(request, &block)
   end
