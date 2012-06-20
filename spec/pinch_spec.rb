@@ -111,6 +111,28 @@ describe Pinch do
       end
     end
   end
+  
+  describe "when calling get on the example ZIP file behind HTTP Basic Authentication" do
+    before do
+      @url  = 'http://code.mrgossett.com/pinch_test.zip'
+      @file = 'data.json'
+      @data = "{\"gem\":\"pinch\",\"authors\":[\"Peter Hellberg\",\"Edward Patel\"],\"github_url\":\"https://github.com/peterhellberg/pinch\"}\n"
+    end
+
+    VCR.use_cassette('basic_auth', :match_requests_on => [:method, :uri, :headers]) do
+      it "should retrieve the contents of the file data.json with valid authentication" do
+        data = Pinch.get @url, @file, 'pinch_test', 'thisisjustatest'
+        data.must_equal @data
+        data.size.must_equal 114
+      end
+    
+      it "should not retrieve the contents of the file data.json with invalid authentication" do
+        lambda {
+          Pinch.get @url, @file, 'invalid_username', 'invalid_password'
+        }.must_raise Net::HTTPServerException
+      end
+    end
+  end
 
   describe "Pinch.file_list" do
     it "should return a list with all the file names in the ZIP file" do
