@@ -31,6 +31,20 @@ The specs currently blows up on MagLev.
 
     puts data
 
+== Patch to use Pinch against Amazon S3 storage with pre-signed urls
+AWS S3 storage verifies url signature against HTTP verb, therefore requiring different pre-signed urls for HEAD and GET requests. Patch extends Pinch gem to accept hash or 2 urls, allowing to fetch items stored in zip archives on S3.
+
+require 'pinch'
+require 'right_aws'
+
+s3 = RightAws::S3Generator.new('...','...')
+bucket = s3.bucket('my-bucket')
+
+head_ticket = bucket.key('test.zip').head
+get_ticket = bucket.key('test.zip').get
+
+data=Pinch.get({:head => head_url, :get => get_url},'data.json')
+
 == LICENSE
 
 Copyright (c) 2011 Peter Hellberg and Edward Patel

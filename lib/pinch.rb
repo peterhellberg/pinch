@@ -6,9 +6,9 @@ require 'pinch_response'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.3.1"
+  VERSION = "0.3.2"
 
-  attr_reader :uri, :user, :pass
+  attr_reader :get_uri, :user, :pass
 
   ##
   # Retrieve a file from inside a zip file, over the network!
@@ -59,14 +59,26 @@ class Pinch
   ##
   # Initializes a new Pinch object
   #
-  # @param    [String] url        Full URL to the ZIP file
+  # @param [String or Hash] url Full URL to the ZIP file or hash with different URLs for HTTP verbs, e.g.
+  #    {
+  #     :head => 'my-url-signed-for-head-verb'
+  #     :get => 'my-url-signed-for-get-verb'
+  #    }
   # @param    [String] user       (Optional) Username for Basic Authentication
   # @param    [String] pass       (Optional) Password for Basic Authentication
   # @param    [Fixnum] redirects  (Optional) Number of redirects to follow
   # @note You might want to use Pinch.get instead.
   #
   def initialize(url, user = nil, pass = nil, redirects = 5)
-    @uri       = URI.parse(url)
+
+    if url.is_a? String
+      @get_uri       = URI.parse(url)
+      @head_uri      = URI.parse(url)
+    elsif url.is_a? Hash
+      @get_uri       = URI.parse(url[:get])
+      @head_uri      = URI.parse(url[:head])
+    end
+
     @user      = user
     @pass      = pass
     @files     = {}
@@ -113,9 +125,9 @@ class Pinch
   #
   def content_length
     @content_length ||= begin
-      request = Net::HTTP::Head.new(@uri.request_uri)
+      request = Net::HTTP::Head.new(@head_uri.request_uri)
       request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
-      response = connection(@uri).request(request)
+      response = connection(@head_uri).request(request)
 
       # Raise exception if the response code isn’t in the 2xx range
       response.error! unless response.kind_of?(Net::HTTPSuccess)
@@ -123,17 +135,17 @@ class Pinch
       # Raise exception if the server doesn’t support the Range header
       unless (response['Accept-Ranges'] or "").include?('bytes')
         raise RangeHeaderException,
-              "Range HTTP header not supported on #{@uri.host}"
+              "Range HTTP header not supported on #{@head_uri.host}"
       end
 
       response['Content-Length'].to_i
     rescue Net::HTTPRetriableError => e
-      @uri = URI.parse(e.response['Location'])
+      @head_uri = URI.parse(e.response['Location'])
 
       if (@redirects -= 1) > 0
         retry
       else
-        raise TooManyRedirects, "Gave up at on #{@uri.host}"
+        raise TooManyRedirects, "Gave up at on #{@head_uri.host}"
       end
     end
   end
@@ -273,10 +285,10 @@ private
   ##
   # Get range of data from URL
   def fetch_data(offset_start, offset_end, &block)
-    request = Net::HTTP::Get.new(@uri.request_uri)
+    request = Net::HTTP::Get.new(@get_uri.request_uri)
     request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
     request.set_range(offset_start..offset_end)
-    connection(@uri).request(request, &block)
+    connection(@get_uri).request(request, &block)
   end
 
   ##
