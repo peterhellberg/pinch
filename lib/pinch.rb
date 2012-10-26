@@ -6,7 +6,7 @@ require 'pinch_response'
 # @author Peter Hellberg
 # @author Edward Patel
 class Pinch
-  VERSION = "0.3.2"
+  VERSION = "0.3.1"
 
   attr_reader :get_uri, :user, :pass
 
@@ -84,7 +84,7 @@ class Pinch
     @files     = {}
     @redirects = redirects
   end
-  
+
   ##
   # Set Username and Password for Basic Authentication
   #
@@ -98,7 +98,7 @@ class Pinch
   def auth(username, password)
     @user = username
     @pass = password
-    
+
     return self
   end
 
