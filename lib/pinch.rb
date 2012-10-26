@@ -70,13 +70,11 @@ class Pinch
   # @note You might want to use Pinch.get instead.
   #
   def initialize(url, user = nil, pass = nil, redirects = 5)
-
-    if url.is_a? String
-      @get_uri       = URI.parse(url)
-      @head_uri      = URI.parse(url)
-    elsif url.is_a? Hash
-      @get_uri       = URI.parse(url[:get])
-      @head_uri      = URI.parse(url[:head])
+    if url.respond_to? :fetch
+      @get_uri  = URI.parse(url.fetch(:get))
+      @head_uri = URI.parse(url.fetch(:head))
+    else
+      @get_uri = @head_uri = URI.parse(url)
     end
 
     @user      = user
