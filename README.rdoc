@@ -27,7 +27,7 @@ The specs currently blows up on MagLev.
 
     require 'pinch'
 
-    data = Pinch.get 'http://peterhellberg.github.com/pinch/test.zip', 'data.json'
+    data = Pinch.get 'http://peterhellberg.github.io/pinch/test.zip', 'data.json'
 
     puts data
 
