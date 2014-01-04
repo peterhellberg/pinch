@@ -5,3 +5,4 @@ demo.rb
 .yardoc
 spec/fixtures
 .rbx
+.bundle/install.log
