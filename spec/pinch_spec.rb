@@ -69,7 +69,7 @@ describe Pinch do
 
   describe "when calling get on the example ZIP file" do
     before do
-      @url  = 'http://peterhellberg.github.com/pinch/test.zip'
+      @url  = 'http://peterhellberg.github.io/pinch/test.zip'
       @file = 'data.json'
       @data = "{\"gem\":\"pinch\",\"authors\":[\"Peter Hellberg\",\"Edward Patel\"],\"github_url\":\"https://github.com/peterhellberg/pinch\"}\n"
     end
@@ -97,7 +97,7 @@ describe Pinch do
 
     it "should retrieve the contents of the file data.json when passed a HTTPS url" do
       VCR.use_cassette('ssl_test') do
-        @url  = 'https://dl.dropbox.com/u/2230186/pinch_test.zip'
+        @url  = 'https://dl.dropboxusercontent.com/u/2230186/pinch_test.zip'
 
         data = Pinch.get @url, @file
         data.must_equal @data
@@ -111,10 +111,10 @@ describe Pinch do
       end
     end
   end
-  
+
   describe "when calling get on the example ZIP file behind HTTP Basic Authentication" do
     before do
-      @url  = 'http://code.mrgossett.com/pinch_test.zip'
+      @url  = 'http://assets.c7.se/data/pinch/auth/pinch_test.zip'
       @file = 'data.json'
       @data = "{\"gem\":\"pinch\",\"authors\":[\"Peter Hellberg\",\"Edward Patel\"],\"github_url\":\"https://github.com/peterhellberg/pinch\"}\n"
     end
@@ -149,7 +149,7 @@ describe Pinch do
 
   describe "Pinch.content_length" do
     before do
-      @url  = 'http://peterhellberg.github.com/pinch/test.zip'
+      @url  = 'http://peterhellberg.github.io/pinch/test.zip'
     end
 
     it "should return the size of the ZIP file" do
