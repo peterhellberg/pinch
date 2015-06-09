@@ -30,17 +30,6 @@ end
 require File.dirname(__FILE__) + '/../lib/pinch'
 
 describe Pinch do
-  describe "url that redirects to the pinch zipball" do
-    it "should throw an exception about missing Range header support on GitHub" do
-      VCR.use_cassette('pinch_zipball') do
-        @url = 'https://github.com/peterhellberg/pinch/zipball/master'
-        lambda {
-          Pinch.file_list(@url)
-        }.must_raise Pinch::RangeHeaderException
-      end
-    end
-  end
-
   describe "when calling get on a compressed ZIP file" do
     it "should return the contents of the file" do
       VCR.use_cassette('squeak') do

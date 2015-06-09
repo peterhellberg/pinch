@@ -130,12 +130,6 @@ class Pinch
       # Raise exception if the response code isn’t in the 2xx range
       response.error! unless response.kind_of?(Net::HTTPSuccess)
 
-      # Raise exception if the server doesn’t support the Range header
-      unless (response['Accept-Ranges'] or "").include?('bytes')
-        raise RangeHeaderException,
-              "Range HTTP header not supported on #{@head_uri.host}"
-      end
-
       response['Content-Length'].to_i
     rescue Net::HTTPRetriableError => e
       @head_uri = URI.parse(e.response['Location'])
@@ -302,6 +296,5 @@ private
     http
   end
 
-  class RangeHeaderException < StandardError; end
   class TooManyRedirects < StandardError; end
 end
