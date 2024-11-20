@@ -42,21 +42,6 @@ class Pinch
   end
 
   ##
-  # Retrieve the size of the ZIP file
-  #
-  # @param    [String] url        Full URL to the ZIP file
-  # @param    [String] user       (Optional) Username for Basic Authentication
-  # @param    [String] pass       (Optional) Password for Basic Authentication
-  # @return   [Fixnum]            Size of the ZIP file
-  # @example
-  #
-  #  Pinch.content_length('http://peterhellberg.github.com/pinch/test.zip') #=> 2516612
-  #
-  def self.content_length(url, user = nil, pass = nil)
-    new(url, user, pass).content_length
-  end
-
-  ##
   # Initializes a new Pinch object
   #
   # @param [String or Hash] url Full URL to the ZIP file or hash with different URLs for HTTP verbs, e.g.
@@ -118,30 +103,6 @@ class Pinch
     local_file(file_name, &block)
   end
 
-  ##
-  # @note You might want to use Pinch.content_length instead
-  #
-  def content_length
-    @content_length ||= begin
-      request = Net::HTTP::Head.new(@head_uri.request_uri)
-      request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
-      response = connection(@head_uri).request(request)
-
-      # Raise exception if the response code isn’t in the 2xx range
-      response.error! unless response.kind_of?(Net::HTTPSuccess)
-
-      response['Content-Length'].to_i
-    rescue Net::HTTPRetriableError => e
-      @head_uri = URI.parse(e.response['Location'])
-
-      if (@redirects -= 1) > 0
-        retry
-      else
-        raise TooManyRedirects, "Gave up at on #{@head_uri.host}"
-      end
-    end
-  end
-
 private
 
   def local_file(file_name)
@@ -170,11 +131,11 @@ private
                    file_headers[file_name][12]
 
     if block_given?
-      fetch_data(offset_start, offset_end) do |response|
+      fetch_data(offset_start..offset_end) do |response|
         yield PinchResponse.new(response)
       end
     else
-      response = fetch_data(offset_start, offset_end)
+      response = fetch_data(offset_start..offset_end)
 
       local_file_header = response.body.unpack('VvvvvvVVVvv')
       file_data         = response.body[30+local_file_header[9]+local_file_header[10]..-1]
@@ -234,8 +195,7 @@ private
       offset_start = end_of_central_directory_record[5]
       offset_end   = end_of_central_directory_record[5] + end_of_central_directory_record[4]
 
-      response = fetch_data(offset_start, offset_end)
-
+      response = fetch_data(offset_start..offset_end)
 
       if ['200', '206'].include?(response.code)
         response.body
@@ -255,10 +215,8 @@ private
     #6  uint16 ZIPfileCommentLength;
 
     @end_of_central_directory_record ||= begin
-      # Retrieve a 4k of data from the end of the zip file
-      offset = content_length >= 4096 ? content_length-4096 : 0
-
-      response = fetch_data(offset, content_length)
+      # Retrieve last 4k of data from the zip file
+      response = fetch_data(-4096)
 
       # Unpack the body into a hex string then split on
       # the end record signature, and finally unpack the last one.
@@ -276,10 +234,10 @@ private
 
   ##
   # Get range of data from URL
-  def fetch_data(offset_start, offset_end, &block)
+  def fetch_data(range, &block)
     request = Net::HTTP::Get.new(@get_uri.request_uri)
     request.basic_auth(@user, @pass) unless @user.nil? || @pass.nil?
-    request.set_range(offset_start..offset_end)
+    request.set_range(range) if range
     connection(@get_uri).request(request, &block)
   end
 

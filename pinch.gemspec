@@ -4,7 +4,7 @@ $:.unshift lib unless $:.include?(lib)
 require 'pinch'
 
 Gem::Specification.new do |s|
-  s.required_ruby_version = '>= 1.8.7'
+  s.required_ruby_version = '>= 3.0.0'
   s.require_paths << 'lib'
 
   s.name        = "pinch"
@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.authors     = ["Peter Hellberg", "Edward Patel"]
   s.license     = "MIT-LICENSE"
 
-  s.has_rdoc          = true
   s.rdoc_options      = ['--main', 'README.rdoc', '--charset=UTF-8']
   s.extra_rdoc_files  = ['README.rdoc', 'MIT-LICENSE']
 
@@ -25,7 +24,9 @@ Gem::Specification.new do |s|
   s.files             = Dir.glob("lib/**/*") +
                         %w(MIT-LICENSE README.rdoc Rakefile .gemtest)
 
-  s.add_development_dependency 'minitest', '~> 5.2'
-  s.add_development_dependency 'webmock', '~> 1.16'
-  s.add_development_dependency 'vcr', '~> 2.8'
+  s.add_dependency 'net-http'
+
+  s.add_development_dependency 'minitest'
+  s.add_development_dependency 'webmock'
+  s.add_development_dependency 'vcr'
 end
